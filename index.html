@@ -1,47 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0f1117" />
+  <meta name="theme-color" id="themeColorMeta" content="#0f1117" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="QuickMsg" />
   <meta name="description" content="Send WhatsApp or Telegram messages without saving the number." />
   <title>QuickMsg</title>
 
-  <!-- Inline PWA manifest via data URI -->
-  <link rel="manifest" href="data:application/manifest+json,{
-    %22name%22:%22QuickMsg%22,
-    %22short_name%22:%22QuickMsg%22,
-    %22description%22:%22Message%20without%20saving%20the%20number%22,
-    %22start_url%22:%22.%22,
-    %22display%22:%22standalone%22,
-    %22background_color%22:%22%230f1117%22,
-    %22theme_color%22:%22%230f1117%22,
-    %22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20512%20512'%3E%3Crect%20width='512'%20height='512'%20rx='100'%20fill='%230f1117'/%3E%3Ctext%20y='360'%20x='256'%20text-anchor='middle'%20font-size='320'%3E%F0%9F%92%AC%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22,%22purpose%22:%22any%20maskable%22}]
-  }" />
-
-  <!-- Apple touch icon (inline SVG base64) -->
-  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEwMCIgZmlsbD0iIzBmMTExNyIvPjx0ZXh0IHk9IjM2MCIgeD0iMjU2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjMyMCI+8J+mrDwvdGV4dD48L3N2Zz4=" />
+  <!-- Apple touch icon -->
+  <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAABmJLR0QA/wD/AP+gvaeTAAADsklEQVR4nO3BMQEAAADCoPVP7WsIoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeAMBuAABHgAAAABJRU5ErkJggg==" />
 
   <style>
-    :root {
-      --bg:       #0f1117;
-      --surface:  #191c27;
-      --border:   #2a2d3a;
-      --muted:    #6b7280;
-      --text:     #f0f2f5;
-      --sub:      #9ca3af;
-      --wa:       #25D366;
-      --wa-dk:    #128C4E;
-      --tg:       #2AABEE;
-      --tg-dk:    #0d7cbf;
-      --accent:   #25D366;
-      --r:        16px;
-      --rs:       10px;
-      --font:     'Inter', system-ui, -apple-system, sans-serif;
+    /* ── Design tokens: dark (default) ── */
+    :root, [data-theme="dark"] {
+      --bg:        #0f1117;
+      --surface:   #191c27;
+      --surface2:  #1e2133;
+      --border:    #2a2d3a;
+      --muted:     #6b7280;
+      --text:      #f0f2f5;
+      --sub:       #9ca3af;
+      --shadow:    rgba(0,0,0,0.4);
+      --tc:        #0f1117;
     }
+
+    [data-theme="light"] {
+      --bg:        #f4f6fa;
+      --surface:   #ffffff;
+      --surface2:  #eef1f7;
+      --border:    #dde1eb;
+      --muted:     #9ca3af;
+      --text:      #111827;
+      --sub:       #6b7280;
+      --shadow:    rgba(0,0,0,0.08);
+      --tc:        #f4f6fa;
+    }
+
+    :root {
+      --wa:      #25D366;
+      --wa-dk:   #128C4E;
+      --tg:      #2AABEE;
+      --tg-dk:   #0d7cbf;
+      --accent:  #25D366;
+      --r:       16px;
+      --rs:      10px;
+      --font:    'Inter', system-ui, -apple-system, sans-serif;
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -52,36 +60,58 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      transition: background .25s, color .25s;
       padding: env(safe-area-inset-top,0) env(safe-area-inset-right,0)
                env(safe-area-inset-bottom,0) env(safe-area-inset-left,0);
     }
 
     .app {
       width: 100%; max-width: 480px;
-      padding: 28px 20px 48px;
-      display: flex; flex-direction: column; gap: 24px;
+      padding: 24px 20px 52px;
+      display: flex; flex-direction: column; gap: 22px;
       min-height: 100dvh;
     }
 
-    /* Header */
-    header { display: flex; align-items: center; gap: 12px; padding-top: 6px; }
+    /* ── Header ── */
+    header {
+      display: flex; align-items: center; gap: 12px; padding-top: 4px;
+    }
     .logo {
       width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
-      background: linear-gradient(135deg, var(--wa) 0%, var(--tg) 100%);
+      background: linear-gradient(135deg, var(--wa), var(--tg));
       display: flex; align-items: center; justify-content: center; font-size: 22px;
+      box-shadow: 0 4px 14px rgba(37,211,102,.3);
     }
+    .brand { flex: 1; }
     .brand h1 { font-size: 20px; font-weight: 700; letter-spacing: -.5px; }
     .brand p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
-    /* Install banner */
-    .install-banner {
+    /* Theme toggle */
+    .theme-btn {
+      width: 38px; height: 38px; border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--surface); color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 18px; flex-shrink: 0;
+      transition: background .2s, border-color .2s;
+    }
+    .theme-btn:active { transform: scale(.93); }
+
+    /* ── Banners ── */
+    .banner {
       display: none; align-items: center; gap: 10px;
-      background: rgba(37,211,102,.08);
-      border: 1px solid rgba(37,211,102,.22);
       border-radius: var(--rs); padding: 12px 14px; font-size: 13px;
     }
-    .install-banner.show { display: flex; }
-    .install-banner p { flex: 1; color: var(--sub); line-height: 1.4; }
+    .banner.show { display: flex; }
+    .banner p { flex: 1; color: var(--sub); line-height: 1.45; }
+    .banner-install {
+      background: rgba(37,211,102,.09);
+      border: 1px solid rgba(37,211,102,.25);
+    }
+    .banner-ios {
+      background: rgba(42,171,238,.09);
+      border: 1px solid rgba(42,171,238,.25);
+    }
     .ib-btn {
       background: var(--wa); color: #fff; border: none;
       border-radius: 8px; padding: 7px 13px;
@@ -90,37 +120,28 @@
     }
     .ib-x {
       background: none; border: none; color: var(--muted);
-      cursor: pointer; font-size: 20px; line-height: 1; padding: 0 2px;
+      cursor: pointer; font-size: 22px; line-height: 1; padding: 0 2px;
+      flex-shrink: 0;
     }
 
-    /* iOS install tip */
-    .ios-tip {
-      display: none; align-items: flex-start; gap: 10px;
-      background: rgba(42,171,238,.08);
-      border: 1px solid rgba(42,171,238,.22);
-      border-radius: var(--rs); padding: 12px 14px; font-size: 13px;
+    /* ── Platform toggle ── */
+    .toggle-label {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--muted); margin-bottom: 8px;
     }
-    .ios-tip.show { display: flex; }
-    .ios-tip p { flex: 1; color: var(--sub); line-height: 1.5; }
-    .ios-tip .ib-x { margin-left: auto; }
-
-    /* Toggle */
-    .toggle-label { font-size: 11px; font-weight: 600; text-transform: uppercase;
-                    letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
     .platform-toggle {
       display: grid; grid-template-columns: 1fr 1fr;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 4px; gap: 4px;
+      border-radius: var(--r); padding: 4px; gap: 4px;
     }
     .pt-btn {
       display: flex; align-items: center; justify-content: center; gap: 8px;
       padding: 12px; border-radius: calc(var(--r) - 4px);
       border: none; background: transparent; color: var(--muted);
       font-size: 14px; font-weight: 600; cursor: pointer;
-      transition: all .22s cubic-bezier(.4,0,.2,1); user-select: none;
-      font-family: var(--font);
+      transition: all .22s cubic-bezier(.4,0,.2,1);
+      font-family: var(--font); user-select: none;
     }
     .pt-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
     .pt-btn.aw { background: rgba(37,211,102,.15); color: var(--wa);
@@ -128,23 +149,29 @@
     .pt-btn.at { background: rgba(42,171,238,.15); color: var(--tg);
                  box-shadow: 0 0 0 1px rgba(42,171,238,.3); }
 
-    /* Card */
+    /* ── Card ── */
     .card {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--r); padding: 20px;
       display: flex; flex-direction: column; gap: 16px;
+      box-shadow: 0 2px 16px var(--shadow);
     }
 
     .field { display: flex; flex-direction: column; gap: 6px; }
-    .field label { font-size: 11px; font-weight: 600; color: var(--sub);
-                   text-transform: uppercase; letter-spacing: .8px; }
+    .field label {
+      font-size: 11px; font-weight: 600; color: var(--sub);
+      text-transform: uppercase; letter-spacing: .8px;
+    }
 
+    /* Phone row */
     .phone-wrap {
       display: flex; align-items: stretch;
       border: 1.5px solid var(--border); border-radius: var(--rs);
-      overflow: hidden; background: var(--bg); transition: border-color .2s;
+      overflow: hidden; background: var(--bg);
+      transition: border-color .2s;
     }
     .phone-wrap:focus-within { border-color: var(--accent); }
+
     .cc-wrap { position: relative; flex-shrink: 0; }
     .cc-wrap select {
       appearance: none; -webkit-appearance: none;
@@ -152,13 +179,14 @@
       border-right: 1.5px solid var(--border);
       color: var(--text); font-family: var(--font);
       font-size: 14px; font-weight: 500;
-      padding: 0 26px 0 12px; height: 100%;
-      cursor: pointer; outline: none; min-width: 88px;
+      padding: 0 30px 0 12px; height: 100%;
+      cursor: pointer; outline: none; min-width: 90px;
     }
     .cc-arr {
-      position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
-      pointer-events: none; color: var(--muted); font-size: 10px;
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      pointer-events: none; color: var(--muted);
     }
+
     .phone-input {
       flex: 1; border: none; outline: none;
       background: transparent; color: var(--text);
@@ -166,6 +194,7 @@
     }
     .phone-input::placeholder { color: var(--muted); }
 
+    /* Message */
     .msg-wrap {
       border: 1.5px solid var(--border); border-radius: var(--rs);
       overflow: hidden; background: var(--bg); transition: border-color .2s;
@@ -175,29 +204,40 @@
       width: 100%; border: none; outline: none; resize: none;
       background: transparent; color: var(--text);
       font-family: var(--font); font-size: 15px; line-height: 1.5;
-      padding: 13px 14px; min-height: 100px;
+      padding: 13px 14px; min-height: 96px;
     }
     textarea::placeholder { color: var(--muted); }
-    .char-count { text-align: right; font-size: 11px; color: var(--muted);
-                  padding: 2px 12px 8px; }
+    .char-count {
+      text-align: right; font-size: 11px; color: var(--muted);
+      padding: 2px 12px 8px;
+    }
 
+    /* CTA */
     .cta {
       width: 100%; padding: 15px; border: none; border-radius: var(--rs);
       font-family: var(--font); font-size: 16px; font-weight: 700;
       cursor: pointer; color: #fff; letter-spacing: .3px;
       display: flex; align-items: center; justify-content: center; gap: 10px;
-      transition: transform .15s, opacity .2s;
+      transition: transform .15s, box-shadow .2s;
     }
     .cta:active { transform: scale(.97); }
     .cta svg { width: 20px; height: 20px; }
-    .wa-cta { background: linear-gradient(135deg, var(--wa), var(--wa-dk)); }
-    .tg-cta { background: linear-gradient(135deg, var(--tg), var(--tg-dk)); }
+    .wa-cta {
+      background: linear-gradient(135deg, var(--wa), var(--wa-dk));
+      box-shadow: 0 4px 18px rgba(37,211,102,.35);
+    }
+    .tg-cta {
+      background: linear-gradient(135deg, var(--tg), var(--tg-dk));
+      box-shadow: 0 4px 18px rgba(42,171,238,.35);
+    }
 
-    /* History */
+    /* ── History ── */
     .history-section { display: flex; flex-direction: column; gap: 10px; }
     .sec-head { display: flex; align-items: center; justify-content: space-between; }
-    .sec-head span { font-size: 11px; font-weight: 600; text-transform: uppercase;
-                     letter-spacing: 1px; color: var(--muted); }
+    .sec-head span {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--muted);
+    }
     .clr-btn {
       font-size: 11px; color: var(--muted); background: none;
       border: none; cursor: pointer; padding: 2px 6px;
@@ -210,28 +250,29 @@
       border-radius: var(--rs); padding: 10px 14px;
       cursor: pointer; transition: border-color .2s, background .2s;
     }
-    .hist-item:hover { border-color: var(--accent); background: rgba(255,255,255,.02); }
+    .hist-item:hover { border-color: var(--accent); }
     .hbadge {
       width: 30px; height: 30px; border-radius: 8px;
       display: flex; align-items: center; justify-content: center; font-size: 14px;
+      flex-shrink: 0;
     }
     .hbadge.wa { background: rgba(37,211,102,.15); }
     .hbadge.tg { background: rgba(42,171,238,.15); }
     .hinfo { flex: 1; min-width: 0; }
     .hnum  { font-size: 14px; font-weight: 600; }
     .htime { font-size: 11px; color: var(--muted); margin-top: 1px; }
-    .harr  { color: var(--muted); font-size: 18px; }
+    .harr  { color: var(--muted); font-size: 18px; flex-shrink: 0; }
 
-    /* Toast */
+    /* ── Toast ── */
     .toast {
       position: fixed; bottom: 28px; left: 50%;
-      transform: translateX(-50%) translateY(16px);
-      background: #1e2130; border: 1px solid var(--border);
+      transform: translateX(-50%) translateY(14px);
+      background: var(--surface2); border: 1px solid var(--border);
       color: var(--text); padding: 10px 20px;
       border-radius: 100px; font-size: 13px; font-weight: 500;
       opacity: 0; transition: all .28s cubic-bezier(.4,0,.2,1);
       pointer-events: none; white-space: nowrap;
-      box-shadow: 0 8px 28px rgba(0,0,0,.45); z-index: 999;
+      box-shadow: 0 8px 28px var(--shadow); z-index: 999;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
@@ -246,18 +287,19 @@
       <h1>QuickMsg</h1>
       <p>Message without saving</p>
     </div>
+    <button class="theme-btn" id="themeBtn" title="Toggle light/dark mode">🌙</button>
   </header>
 
   <!-- Android install banner -->
-  <div class="install-banner" id="installBanner">
-    <p>📲 Add QuickMsg to your home screen for instant access</p>
+  <div class="banner banner-install" id="installBanner">
+    <p>📲 Add QuickMsg to your home screen</p>
     <button class="ib-btn" id="installBtn">Install</button>
     <button class="ib-x" id="dismissInstall">×</button>
   </div>
 
-  <!-- iOS install tip -->
-  <div class="ios-tip" id="iosTip">
-    <p>📲 <strong>Install on iPhone:</strong> Tap the Share button <strong>⎙</strong> in Safari, then choose <strong>"Add to Home Screen"</strong></p>
+  <!-- iOS tip -->
+  <div class="banner banner-ios" id="iosTip">
+    <p>📲 <strong>Install on iPhone:</strong> Tap <strong>⎙ Share</strong> in Safari → <strong>"Add to Home Screen"</strong></p>
     <button class="ib-x" id="dismissIos">×</button>
   </div>
 
@@ -266,24 +308,30 @@
     <div class="toggle-label">Choose Platform</div>
     <div class="platform-toggle">
       <button class="pt-btn aw" id="btnWA" onclick="setPlatform('wa')">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
         WhatsApp
       </button>
       <button class="pt-btn" id="btnTG" onclick="setPlatform('tg')">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+        </svg>
         Telegram
       </button>
     </div>
   </div>
 
-  <!-- Form card -->
+  <!-- Form -->
   <div class="card">
     <div class="field">
       <label for="phoneInput">Phone Number</label>
       <div class="phone-wrap">
         <div class="cc-wrap">
           <select id="countryCode" aria-label="Country code"></select>
-          <svg class="cc-arr" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg class="cc-arr" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3 5.5L7 9.5L11 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
         <input type="tel" id="phoneInput" class="phone-input"
                placeholder="Enter number…" inputmode="tel" autocomplete="off" />
@@ -291,7 +339,7 @@
     </div>
 
     <div class="field">
-      <label for="msgInput">Message <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+      <label for="msgInput">Message <span style="font-weight:400;opacity:.7">(optional)</span></label>
       <div class="msg-wrap">
         <textarea id="msgInput" placeholder="Type a message to pre-fill…"
                   maxlength="1000" rows="3"></textarea>
@@ -322,87 +370,104 @@
 <script>
 // ── Countries ──
 const CC = [
-  ['AF','+93','Afghanistan'],['AL','+355','Albania'],['DZ','+213','Algeria'],
-  ['AR','+54','Argentina'],['AU','+61','Australia'],['AT','+43','Austria'],
-  ['BD','+880','Bangladesh'],['BE','+32','Belgium'],['BR','+55','Brazil'],
-  ['CA','+1','Canada'],['CN','+86','China'],['CO','+57','Colombia'],
-  ['DK','+45','Denmark'],['EG','+20','Egypt'],['ET','+251','Ethiopia'],
-  ['FI','+358','Finland'],['FR','+33','France'],['DE','+49','Germany'],
-  ['GH','+233','Ghana'],['GR','+30','Greece'],['IN','+91','India'],
-  ['ID','+62','Indonesia'],['IR','+98','Iran'],['IQ','+964','Iraq'],
-  ['IE','+353','Ireland'],['IL','+972','Israel'],['IT','+39','Italy'],
-  ['JP','+81','Japan'],['JO','+962','Jordan'],['KE','+254','Kenya'],
-  ['MY','+60','Malaysia'],['MX','+52','Mexico'],['MA','+212','Morocco'],
-  ['NL','+31','Netherlands'],['NZ','+64','New Zealand'],['NG','+234','Nigeria'],
-  ['NO','+47','Norway'],['PK','+92','Pakistan'],['PH','+63','Philippines'],
-  ['PL','+48','Poland'],['PT','+351','Portugal'],['RO','+40','Romania'],
-  ['RU','+7','Russia'],['SA','+966','Saudi Arabia'],['SG','+65','Singapore'],
-  ['ZA','+27','South Africa'],['KR','+82','South Korea'],['ES','+34','Spain'],
-  ['LK','+94','Sri Lanka'],['SE','+46','Sweden'],['CH','+41','Switzerland'],
-  ['TW','+886','Taiwan'],['TZ','+255','Tanzania'],['TH','+66','Thailand'],
-  ['TR','+90','Turkey'],['AE','+971','UAE'],['UG','+256','Uganda'],
-  ['UA','+380','Ukraine'],['GB','+44','United Kingdom'],['US','+1','United States'],
-  ['VN','+84','Vietnam'],
+  ['AF','+93'],['AL','+355'],['DZ','+213'],['AR','+54'],['AU','+61'],
+  ['AT','+43'],['BD','+880'],['BE','+32'],['BR','+55'],['CA','+1'],
+  ['CN','+86'],['CO','+57'],['DK','+45'],['EG','+20'],['ET','+251'],
+  ['FI','+358'],['FR','+33'],['DE','+49'],['GH','+233'],['GR','+30'],
+  ['IN','+91'],['ID','+62'],['IR','+98'],['IQ','+964'],['IE','+353'],
+  ['IL','+972'],['IT','+39'],['JP','+81'],['JO','+962'],['KE','+254'],
+  ['MY','+60'],['MX','+52'],['MA','+212'],['NL','+31'],['NZ','+64'],
+  ['NG','+234'],['NO','+47'],['PK','+92'],['PH','+63'],['PL','+48'],
+  ['PT','+351'],['RO','+40'],['RU','+7'],['SA','+966'],['SG','+65'],
+  ['ZA','+27'],['KR','+82'],['ES','+34'],['LK','+94'],['SE','+46'],
+  ['CH','+41'],['TW','+886'],['TZ','+255'],['TH','+66'],['TR','+90'],
+  ['AE','+971'],['UG','+256'],['UA','+380'],['GB','+44'],['US','+1'],['VN','+84'],
 ];
 
 const TZ_MAP = {
-  'Asia/Kolkata':'+91','America/New_York':'+1','America/Los_Angeles':'+1',
-  'America/Chicago':'+1','Europe/London':'+44','Europe/Paris':'+33',
+  'Asia/Kolkata':'+91','Asia/Calcutta':'+91',
+  'America/New_York':'+1','America/Los_Angeles':'+1','America/Chicago':'+1',
+  'Europe/London':'+44','Europe/Paris':'+33','Europe/Berlin':'+49',
   'Asia/Dubai':'+971','Asia/Singapore':'+65','Asia/Tokyo':'+81',
   'Australia/Sydney':'+61','Asia/Karachi':'+92','Asia/Dhaka':'+880',
-  'America/Sao_Paulo':'+55','Europe/Berlin':'+49','Asia/Riyadh':'+966',
+  'America/Sao_Paulo':'+55','Asia/Riyadh':'+966',
   'Asia/Colombo':'+94','Asia/Manila':'+63','Africa/Lagos':'+234',
 };
 
 const WA_PATH = `M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z`;
 const TG_PATH = `M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z`;
 
-// ── Init country select ──
+// ── Country select ──
 const ccSel = document.getElementById('countryCode');
-CC.forEach(([iso, code, name]) => {
+CC.forEach(([iso, code]) => {
   const o = document.createElement('option');
-  o.value = code; o.textContent = `${iso} ${code}`; o.title = name;
+  o.value = code; o.textContent = `${iso} ${code}`;
   ccSel.appendChild(o);
 });
-try {
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const guess = TZ_MAP[tz] || '+91'; // default to India if timezone not matched
-  const o = [...ccSel.options].find(x => x.value === guess);
-  if (o) o.selected = true;
-} catch(e) {
-  // fallback: select India
-  const o = [...ccSel.options].find(x => x.value === '+91');
-  if (o) o.selected = true;
+(function setDefaultCountry() {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const code = TZ_MAP[tz] || '+91';
+    const o = [...ccSel.options].find(x => x.value === code);
+    if (o) { o.selected = true; return; }
+  } catch(e) {}
+  const fallback = [...ccSel.options].find(x => x.value === '+91');
+  if (fallback) fallback.selected = true;
+})();
+
+// ── Theme ──
+const html = document.documentElement;
+const themeBtn = document.getElementById('themeBtn');
+const themeMeta = document.getElementById('themeColorMeta');
+
+function applyTheme(t) {
+  html.setAttribute('data-theme', t);
+  themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+  themeMeta.content = t === 'dark' ? '#0f1117' : '#f4f6fa';
+  localStorage.setItem('qm_theme', t);
 }
+
+// Load saved or detect system preference
+const savedTheme = localStorage.getItem('qm_theme');
+if (savedTheme) {
+  applyTheme(savedTheme);
+} else {
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(prefersDark ? 'dark' : 'light');
+}
+
+themeBtn.onclick = () => {
+  applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+};
 
 // ── Platform ──
 let platform = 'wa';
 function setPlatform(p) {
   platform = p;
-  const r = document.documentElement;
   const wa = p === 'wa';
   document.getElementById('btnWA').className = 'pt-btn' + (wa ? ' aw' : '');
   document.getElementById('btnTG').className = 'pt-btn' + (!wa ? ' at' : '');
   document.getElementById('sendBtn').className = 'cta ' + (wa ? 'wa-cta' : 'tg-cta');
   document.getElementById('ctaIcon').innerHTML = `<path d="${wa ? WA_PATH : TG_PATH}"/>`;
   document.getElementById('ctaLabel').textContent = wa ? 'Open in WhatsApp' : 'Open in Telegram';
-  r.style.setProperty('--accent', wa ? '#25D366' : '#2AABEE');
+  document.documentElement.style.setProperty('--accent', wa ? '#25D366' : '#2AABEE');
 }
 
 // ── Char count ──
 const msgEl = document.getElementById('msgInput');
-const ccEl  = document.getElementById('charCount');
-msgEl.addEventListener('input', () => ccEl.textContent = msgEl.value.length);
+msgEl.addEventListener('input', () => {
+  document.getElementById('charCount').textContent = msgEl.value.length;
+});
 
 // ── Open chat ──
 function openChat() {
-  const raw  = document.getElementById('phoneInput').value.trim();
-  const cc   = ccSel.value;
-  const msg  = msgEl.value.trim();
+  const raw = document.getElementById('phoneInput').value.trim();
+  const cc  = ccSel.value;
+  const msg = msgEl.value.trim();
   if (!raw) { toast('Please enter a phone number'); return; }
-  const digits = raw.replace(/\D/g,'');
+  const digits = raw.replace(/\D/g, '');
   if (!digits) { toast('Enter a valid phone number'); return; }
-  const full = cc.replace(/\D/g,'') + digits.replace(/^0+/,'');
+  const full = cc.replace(/\D/g, '') + digits.replace(/^0+/, '');
   const url  = platform === 'wa'
     ? `https://wa.me/${full}` + (msg ? `?text=${encodeURIComponent(msg)}` : '')
     : `https://t.me/+${full}`;
@@ -411,16 +476,15 @@ function openChat() {
   window.open(url, '_blank');
 }
 
-// ── Enter key ──
 document.getElementById('phoneInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') openChat();
 });
 
 // ── History ──
-function getHist() { try { return JSON.parse(localStorage.getItem('qm_h')||'[]'); } catch { return []; } }
+function getHist() { try { return JSON.parse(localStorage.getItem('qm_h') || '[]'); } catch { return []; } }
 function saveHist(e) {
-  let h = getHist().filter(x => !(x.number===e.number && x.platform===e.platform));
-  h.unshift(e); h = h.slice(0,10);
+  let h = getHist().filter(x => !(x.number === e.number && x.platform === e.platform));
+  h.unshift(e); h = h.slice(0, 10);
   localStorage.setItem('qm_h', JSON.stringify(h));
 }
 function clearHistory() { localStorage.removeItem('qm_h'); renderHist(); }
@@ -429,16 +493,15 @@ function renderHist() {
   const h = getHist();
   const sec = document.getElementById('histSec');
   const list = document.getElementById('histList');
-  if (!h.length) { sec.style.display='none'; return; }
+  if (!h.length) { sec.style.display = 'none'; return; }
   sec.style.display = 'flex';
   list.innerHTML = h.map(e => {
     const d = new Date(e.ts);
-    const t = d.toLocaleDateString(undefined,{month:'short',day:'numeric'}) +
-              ' · ' + d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
-    const icon = e.platform==='wa' ? '💬' : '✈️';
-    const label = e.platform==='wa' ? 'WhatsApp' : 'Telegram';
-    // Escape for safe inline onclick attribute
-    const ep = e.platform, en = e.number.replace(/'/g,"\\'"), ed = e.display.replace(/'/g,"\\'");
+    const t = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
+              ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    const icon  = e.platform === 'wa' ? '💬' : '✈️';
+    const label = e.platform === 'wa' ? 'WhatsApp' : 'Telegram';
+    const ep = e.platform, en = e.number.replace(/'/g, "\\'"), ed = e.display.replace(/'/g, "\\'");
     return `<div class="hist-item" onclick="fillHist('${ep}','${en}','${ed}')">
       <div class="hbadge ${e.platform}">${icon}</div>
       <div class="hinfo">
@@ -453,7 +516,7 @@ function renderHist() {
 function fillHist(p, full, display) {
   setPlatform(p);
   for (const o of ccSel.options) {
-    const cd = o.value.replace(/\D/g,'');
+    const cd = o.value.replace(/\D/g, '');
     if (full.startsWith(cd)) {
       o.selected = true;
       document.getElementById('phoneInput').value = full.slice(cd.length);
@@ -471,33 +534,55 @@ function toast(msg) {
   clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
-// ── PWA: inline service worker via Blob ──
-const SW_CODE = `
-const CV = 'qm-v1';
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CV).then(c => c.addAll([self.location.href])));
-  self.skipWaiting();
-});
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(ks =>
-    Promise.all(ks.filter(k=>k!==CV).map(k=>caches.delete(k)))
-  ));
+// ── PWA manifest injected as Blob (works on Android Chrome) ──
+(function injectManifest() {
+  const manifest = {
+    name: 'QuickMsg',
+    short_name: 'QuickMsg',
+    description: 'Message without saving the number',
+    start_url: location.href,
+    scope: location.href,
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#0f1117',
+    theme_color: '#0f1117',
+    icons: [
+      {
+        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%230f1117'/%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2325D366'/%3E%3Cstop offset='1' stop-color='%232AABEE'/%3E%3C/linearGradient%3E%3Crect x='100' y='100' width='312' height='312' rx='60' fill='url(%23g)'/%3E%3Ctext y='340' x='256' text-anchor='middle' font-size='200' font-family='system-ui'%3E%F0%9F%92%AC%3C/text%3E%3C/svg%3E",
+        sizes: '512x512',
+        type: 'image/svg+xml',
+        purpose: 'any maskable'
+      }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+  const url  = URL.createObjectURL(blob);
+  const link = document.createElement('link');
+  link.rel = 'manifest'; link.href = url;
+  document.head.appendChild(link);
+})();
+
+// ── Service Worker via Blob ──
+if ('serviceWorker' in navigator) {
+  const sw = `
+const CV='qm-v2';
+self.addEventListener('install',e=>{self.skipWaiting();});
+self.addEventListener('activate',e=>{
+  e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CV).map(k=>caches.delete(k)))));
   self.clients.claim();
 });
-self.addEventListener('fetch', e => {
-  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
-});
-`;
-if ('serviceWorker' in navigator) {
-  const blob = new Blob([SW_CODE], { type: 'application/javascript' });
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(() => {});
+self.addEventListener('fetch',e=>{
+  e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));
+});`;
+  const blob = new Blob([sw], { type: 'application/javascript' });
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
 }
 
-// ── Install prompt ──
+// ── Android install prompt ──
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault(); deferredPrompt = e;
+  e.preventDefault();
+  deferredPrompt = e;
   if (!localStorage.getItem('qm_nodl')) {
     document.getElementById('installBanner').classList.add('show');
   }
@@ -511,19 +596,19 @@ document.getElementById('installBtn').onclick = async () => {
 };
 document.getElementById('dismissInstall').onclick = () => {
   document.getElementById('installBanner').classList.remove('show');
-  localStorage.setItem('qm_nodl','1');
+  localStorage.setItem('qm_nodl', '1');
 };
 
 // ── iOS tip ──
 const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-const isSafari = /safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent);
-const isStandalone = ('standalone' in navigator) && navigator.standalone;
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+const isStandalone = window.navigator.standalone === true;
 if (isIos && isSafari && !isStandalone && !localStorage.getItem('qm_noios')) {
   document.getElementById('iosTip').classList.add('show');
 }
 document.getElementById('dismissIos').onclick = () => {
   document.getElementById('iosTip').classList.remove('show');
-  localStorage.setItem('qm_noios','1');
+  localStorage.setItem('qm_noios', '1');
 };
 
 // ── Boot ──
