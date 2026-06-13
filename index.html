@@ -226,34 +226,6 @@
     .reset-btn:active { transform: scale(.97); }
     .reset-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
 
-    /* Message suggestions */
-    .sugg-label {
-      font-size: 11px; font-weight: 600; color: var(--sub);
-      text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px;
-    }
-    .sugg-scroll {
-      display: flex; gap: 7px;
-      overflow-x: auto; padding-bottom: 2px;
-      scrollbar-width: none;
-    }
-    .sugg-scroll::-webkit-scrollbar { display: none; }
-    .sugg-chip {
-      flex-shrink: 0;
-      border: 1.5px solid var(--border);
-      background: var(--bg); color: var(--sub);
-      border-radius: 100px; padding: 6px 12px;
-      font-size: 12px; font-weight: 500; cursor: pointer;
-      font-family: var(--font); white-space: nowrap;
-      transition: border-color .18s, color .18s, background .18s;
-    }
-    .sugg-chip:hover  { border-color: var(--accent); color: var(--text); }
-    .sugg-chip:active { transform: scale(.96); }
-    .sugg-chip.selected {
-      border-color: var(--accent);
-      background: rgba(37,211,102,.1);
-      color: var(--accent);
-    }
-
     /* CTA */
     .cta {
       width: 100%; padding: 15px; border: none; border-radius: var(--rs);
@@ -382,9 +354,6 @@
 
     <div class="field">
       <label for="msgInput">Message <span style="font-weight:400;opacity:.7">(optional)</span></label>
-      <!-- Quick suggestions -->
-      <div class="sugg-label">Quick suggestions</div>
-      <div class="sugg-scroll" id="suggRow"></div>
       <div class="msg-wrap">
         <textarea id="msgInput" placeholder="Type a message to pre-fill…"
                   maxlength="1000" rows="3"></textarea>
@@ -407,6 +376,7 @@
       </svg>
       Reset
     </button>
+  </div>
 
   <!-- Recent -->
   <div class="history-section" id="histSec" style="display:none">
@@ -508,9 +478,6 @@ function setPlatform(p) {
 
 // ── Char count ──
 const msgEl = document.getElementById('msgInput');
-msgEl.addEventListener('input', () => {
-  document.getElementById('charCount').textContent = msgEl.value.length;
-});
 
 // ── Open chat ──
 function openChat() {
@@ -663,6 +630,23 @@ document.getElementById('dismissIos').onclick = () => {
   document.getElementById('iosTip').classList.remove('show');
   localStorage.setItem('qm_noios', '1');
 };
+
+// ── Char count ──
+msgEl.addEventListener('input', () => {
+  document.getElementById('charCount').textContent = msgEl.value.length;
+});
+
+// ── Reset form ──
+function resetForm() {
+  document.getElementById('phoneInput').value = '';
+  msgEl.value = '';
+  document.getElementById('charCount').textContent = '0';
+  const fallback = [...ccSel.options].find(x => x.value === '+91');
+  if (fallback) fallback.selected = true;
+  setPlatform('wa');
+  document.getElementById('phoneInput').focus();
+  toast('Form reset ✓');
+}
 
 // ── Boot ──
 renderHist();
