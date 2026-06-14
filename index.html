@@ -105,13 +105,20 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html { height: 100%; overflow-x: hidden; font-size: 16px; background: var(--bg); transition: font-size .2s; }
+html {
+  height: 100%; height: 100dvh;
+  overflow: hidden;
+  font-size: 16px; background: var(--bg); transition: font-size .2s;
+}
 body {
   font-family: 'Inter', -apple-system, sans-serif;
   background: var(--bg); color: var(--text1);
-  min-height: 100dvh; max-width: 100vw;
+  height: 100%; height: 100dvh;
+  max-width: 100vw;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   transition: background .25s, color .25s;
   padding:
     env(safe-area-inset-top, 0px)
@@ -126,7 +133,6 @@ body {
   width: 100%; max-width: 480px; margin: 0 auto;
   padding: 1.25rem 14px 3.5rem;
   display: flex; flex-direction: column; gap: 1.25rem;
-  min-height: 100dvh;
 }
 
 /* ── Header (index4 sticky style) ── */
@@ -239,7 +245,7 @@ body {
   display: flex; align-items: stretch;
   border: 1.5px solid var(--border); border-radius: var(--r-lg);
   overflow: hidden; background: var(--bg); transition: border-color .2s;
-  height: 3rem;
+  height: 52px;
 }
 .phone-wrap:focus-within { border-color: var(--accent); }
 .phone-wrap.err { border-color: var(--red) !important; box-shadow: 0 0 0 2px rgba(248,113,113,.15); }
@@ -255,9 +261,9 @@ body {
   background: transparent; border: none;
   border-right: 1.5px solid var(--border);
   color: var(--text1); font-family: var(--mono);
-  font-size: 0.9375rem; font-weight: 500;
+  font-size: 15px; font-weight: 500;
   padding: 0 1.875rem 0 0.75rem;
-  height: 3rem; width: 100%;
+  height: 52px; width: 100%;
   cursor: pointer; outline: none;
   text-align: left;
   text-align-last: left;
@@ -271,10 +277,10 @@ body {
   pointer-events: none; color: var(--text3);
 }
 .phone-input {
-  flex: 1; border: none; outline: none;
+  flex: 1; min-width: 0; border: none; outline: none;
   background: transparent; color: var(--text1);
-  font-family: var(--mono); font-size: 0.9375rem;
-  padding: 0.8125rem 0.875rem;
+  font-family: var(--mono); font-size: 15px;
+  padding: 0 0.75rem;
 }
 .phone-input::placeholder { color: var(--text3); }
 
@@ -318,7 +324,7 @@ textarea::placeholder { color: var(--text3); }
 /* ── Clear pill — phone field ── */
 .phone-clear {
   display: none; align-items: center; justify-content: center;
-  padding: 0 0.75rem; flex-shrink: 0; height: 3rem;
+  padding: 0 0.625rem; flex-shrink: 0; height: 52px; min-width: 3.5rem;
   background: none; border: none; border-left: 1.5px solid var(--border);
   cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
@@ -327,8 +333,9 @@ textarea::placeholder { color: var(--text3); }
   display: flex; align-items: center; justify-content: center;
   padding: 3px 8px; border-radius: 99px;
   background: var(--surface3); border: 1px solid var(--border2);
-  font-family: var(--mono); font-size: 0.65rem;
+  font-family: var(--mono); font-size: 11px;
   font-weight: 600; color: var(--text3); letter-spacing: 0.2px;
+  white-space: nowrap; flex-shrink: 0;
   transition: background .15s, color .15s, border-color .15s;
 }
 .phone-clear:hover .phone-clear-pill { color: var(--accent); border-color: var(--accent); background: rgba(37,211,102,.06); }
@@ -498,8 +505,8 @@ textarea::placeholder { color: var(--text3); }
     <div class="hdr-left">
       <div class="logo-icon">💬</div>
       <div class="hdr-titles">
-        <div class="hdr-greeting">Message without saving</div>
         <div class="hdr-name">QuickMsg</div>
+        <div class="hdr-greeting">Message without saving</div>
       </div>
     </div>
     <div class="hdr-right">
