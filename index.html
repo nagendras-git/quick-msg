@@ -266,47 +266,86 @@ body {
 }
 .cc-trigger svg { flex-shrink: 0; color: var(--text3); pointer-events: none; }
 /* Custom dropdown list */
+.cc-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6); z-index: 199;
+  backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+}
+.cc-backdrop.open { display: block; }
 .cc-dropdown {
-  display: none;
   position: fixed;
-  left: 50%; transform: translateX(-50%);
+  left: 50%; transform: translateX(-50%) translateY(100%);
   bottom: 0;
   width: min(100vw, 480px);
-  max-height: 60vh;
+  height: 72vh;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px 20px 0 0;
-  overflow-y: auto;
+  border-radius: 24px 24px 0 0;
   z-index: 200;
+  display: flex; flex-direction: column;
+  box-shadow: 0 -8px 48px rgba(0,0,0,0.6);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow: hidden;
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  box-shadow: 0 -4px 32px rgba(0,0,0,0.5);
 }
-.cc-dropdown.open { display: block; }
+.cc-dropdown.open { transform: translateX(-50%) translateY(0); }
 .cc-dropdown-handle {
-  width: 36px; height: 4px; border-radius: 2px;
-  background: var(--border); margin: 10px auto 6px;
+  width: 40px; height: 4px; border-radius: 2px;
+  background: var(--border); margin: 12px auto 0; flex-shrink: 0;
+}
+.cc-dropdown-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px 10px; flex-shrink: 0;
 }
 .cc-dropdown-title {
-  text-align: center; font-size: 0.75rem; font-weight: 600;
-  color: var(--text3); letter-spacing: 0.4px; text-transform: uppercase;
-  padding-bottom: 8px;
+  font-size: 1rem; font-weight: 700; color: var(--text1); letter-spacing: -0.2px;
 }
+.cc-close-btn {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--surface2); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text2); flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.cc-close-btn:active { opacity: 0.7; }
+.cc-search-wrap {
+  padding: 0 16px 10px; flex-shrink: 0;
+}
+.cc-search {
+  width: 100%; padding: 10px 14px 10px 38px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; color: var(--text1); font-size: 15px;
+  outline: none; box-sizing: border-box;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: 12px center;
+}
+.cc-search::placeholder { color: var(--text3); }
+.cc-list-scroll { overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
 .cc-option {
-  display: flex; align-items: center; padding: 13px 20px;
-  font-family: var(--mono); font-size: 15px; font-weight: 500;
-  color: var(--text1); cursor: pointer; gap: 10px;
+  display: flex; align-items: center; padding: 12px 20px;
+  cursor: pointer; gap: 12px;
   border-bottom: 1px solid var(--border2);
   -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s;
 }
 .cc-option:last-child { border-bottom: none; }
 .cc-option:active { background: var(--surface2); }
-.cc-option.selected { color: var(--accent); }
-.cc-option-code { color: var(--text3); font-size: 13px; margin-left: auto; }
-.cc-backdrop {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.55); z-index: 199;
+.cc-option.selected { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.cc-flag { font-size: 22px; line-height: 1; flex-shrink: 0; }
+.cc-option-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.cc-option-name { font-size: 15px; font-weight: 500; color: var(--text1); }
+.cc-option.selected .cc-option-name { color: var(--accent); }
+.cc-option-iso { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.cc-option-code {
+  font-family: var(--mono); font-size: 14px; font-weight: 600;
+  color: var(--text2); flex-shrink: 0;
 }
-.cc-backdrop.open { display: block; }
+.cc-option.selected .cc-option-code { color: var(--accent); }
+.cc-check { margin-left: 6px; color: var(--accent); opacity: 0; flex-shrink: 0; }
+.cc-option.selected .cc-check { opacity: 1; }
+.cc-no-results {
+  text-align: center; padding: 40px 20px;
+  color: var(--text3); font-size: 14px;
+}
 .phone-input {
   flex: 1; min-width: 0; border: none; outline: none;
   background: transparent; color: var(--text1);
@@ -602,8 +641,18 @@ textarea::placeholder { color: var(--text3); }
         <div class="cc-backdrop" id="ccBackdrop"></div>
         <div class="cc-dropdown" id="ccDropdown">
           <div class="cc-dropdown-handle"></div>
-          <div class="cc-dropdown-title">Select Country Code</div>
-          <div id="ccList"></div>
+          <div class="cc-dropdown-header">
+            <div class="cc-dropdown-title">Select Country</div>
+            <button class="cc-close-btn" id="ccCloseBtn" aria-label="Close">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <div class="cc-search-wrap">
+            <input class="cc-search" id="ccSearch" type="text" placeholder="Search country or code…" autocomplete="off"/>
+          </div>
+          <div class="cc-list-scroll" id="ccList"></div>
         </div>
         <input type="tel" id="phoneInput" class="phone-input"
                placeholder="Enter number…" inputmode="numeric" autocomplete="off"
@@ -684,18 +733,27 @@ textarea::placeholder { color: var(--text3); }
 <script>
 // ── Countries ──
 const CC = [
-  ['AF','+93'],['AL','+355'],['DZ','+213'],['AR','+54'],['AU','+61'],
-  ['AT','+43'],['BD','+880'],['BE','+32'],['BR','+55'],['CA','+1'],
-  ['CN','+86'],['CO','+57'],['DK','+45'],['EG','+20'],['ET','+251'],
-  ['FI','+358'],['FR','+33'],['DE','+49'],['GH','+233'],['GR','+30'],
-  ['IN','+91'],['ID','+62'],['IR','+98'],['IQ','+964'],['IE','+353'],
-  ['IL','+972'],['IT','+39'],['JP','+81'],['JO','+962'],['KE','+254'],
-  ['MY','+60'],['MX','+52'],['MA','+212'],['NL','+31'],['NZ','+64'],
-  ['NG','+234'],['NO','+47'],['PK','+92'],['PH','+63'],['PL','+48'],
-  ['PT','+351'],['RO','+40'],['RU','+7'],['SA','+966'],['SG','+65'],
-  ['ZA','+27'],['KR','+82'],['ES','+34'],['LK','+94'],['SE','+46'],
-  ['CH','+41'],['TW','+886'],['TZ','+255'],['TH','+66'],['TR','+90'],
-  ['AE','+971'],['UG','+256'],['UA','+380'],['GB','+44'],['US','+1'],['VN','+84'],
+  ['AF','Afghanistan','+93'],['AL','Albania','+355'],['DZ','Algeria','+213'],
+  ['AR','Argentina','+54'],['AU','Australia','+61'],['AT','Austria','+43'],
+  ['BD','Bangladesh','+880'],['BE','Belgium','+32'],['BR','Brazil','+55'],
+  ['CA','Canada','+1'],['CN','China','+86'],['CO','Colombia','+57'],
+  ['DK','Denmark','+45'],['EG','Egypt','+20'],['ET','Ethiopia','+251'],
+  ['FI','Finland','+358'],['FR','France','+33'],['DE','Germany','+49'],
+  ['GH','Ghana','+233'],['GR','Greece','+30'],['IN','India','+91'],
+  ['ID','Indonesia','+62'],['IR','Iran','+98'],['IQ','Iraq','+964'],
+  ['IE','Ireland','+353'],['IL','Israel','+972'],['IT','Italy','+39'],
+  ['JP','Japan','+81'],['JO','Jordan','+962'],['KE','Kenya','+254'],
+  ['MY','Malaysia','+60'],['MX','Mexico','+52'],['MA','Morocco','+212'],
+  ['NL','Netherlands','+31'],['NZ','New Zealand','+64'],['NG','Nigeria','+234'],
+  ['NO','Norway','+47'],['PK','Pakistan','+92'],['PH','Philippines','+63'],
+  ['PL','Poland','+48'],['PT','Portugal','+351'],['RO','Romania','+40'],
+  ['RU','Russia','+7'],['SA','Saudi Arabia','+966'],['SG','Singapore','+65'],
+  ['ZA','South Africa','+27'],['KR','South Korea','+82'],['ES','Spain','+34'],
+  ['LK','Sri Lanka','+94'],['SE','Sweden','+46'],['CH','Switzerland','+41'],
+  ['TW','Taiwan','+886'],['TZ','Tanzania','+255'],['TH','Thailand','+66'],
+  ['TR','Turkey','+90'],['AE','UAE','+971'],['UG','Uganda','+256'],
+  ['UA','Ukraine','+380'],['GB','United Kingdom','+44'],['US','United States','+1'],
+  ['VN','Vietnam','+84'],
 ];
 const TZ_MAP = {
   'Asia/Kolkata':'+91','Asia/Calcutta':'+91',
@@ -711,54 +769,84 @@ const WA_PATH = `M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.
 const TG_PATH = `M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z`;
 
 // ── Country code custom dropdown ──
+function isoToFlag(iso) {
+  return iso.toUpperCase().split('').map(c => String.fromCodePoint(0x1F1E6 - 65 + c.charCodeAt(0))).join('');
+}
+
 let ccValue = '+91';
+let ccIso   = 'IN';
 const ccLabel  = document.getElementById('ccLabel');
 const ccList   = document.getElementById('ccList');
 const ccDrop   = document.getElementById('ccDropdown');
 const ccBack   = document.getElementById('ccBackdrop');
+const ccSearch = document.getElementById('ccSearch');
 
 // Stub so validation code that references ccSel.value still works
 const ccSel = { get value() { return ccValue; } };
 
-function setCCValue(iso, code) {
-  ccValue = code;
-  ccLabel.textContent = `${iso} ${code}`;
-  // update selected highlight
+function setCCValue(iso, name, code) {
+  ccValue = code; ccIso = iso;
+  ccLabel.textContent = `${isoToFlag(iso)} ${code}`;
   ccList.querySelectorAll('.cc-option').forEach(el => {
-    el.classList.toggle('selected', el.dataset.code === code);
+    el.classList.toggle('selected', el.dataset.iso === iso);
+  });
+}
+
+function renderCCList(filter) {
+  const q = (filter || '').toLowerCase().trim();
+  ccList.innerHTML = '';
+  const filtered = q ? CC.filter(([iso, name, code]) =>
+    iso.toLowerCase().includes(q) ||
+    name.toLowerCase().includes(q) ||
+    code.includes(q)
+  ) : CC;
+  if (!filtered.length) {
+    ccList.innerHTML = '<div class="cc-no-results">No countries found</div>';
+    return;
+  }
+  filtered.forEach(([iso, name, code]) => {
+    const div = document.createElement('div');
+    div.className = 'cc-option' + (iso === ccIso ? ' selected' : '');
+    div.dataset.iso = iso;
+    div.innerHTML = `
+      <span class="cc-flag">${isoToFlag(iso)}</span>
+      <div class="cc-option-info">
+        <span class="cc-option-name">${name}</span>
+        <span class="cc-option-iso">${iso}</span>
+      </div>
+      <span class="cc-option-code">${code}</span>
+      <svg class="cc-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    div.addEventListener('click', () => {
+      setCCValue(iso, name, code);
+      closeCCDropdown();
+      const digits = document.getElementById('phoneInput').value.replace(/\D/g, '');
+      if (digits) {
+        const err = getPhoneError(digits, ccValue);
+        if (err) showPhoneErr(err); else clearPhoneErr();
+      }
+    });
+    ccList.appendChild(div);
   });
 }
 
 function openCCDropdown() {
+  renderCCList('');
+  ccSearch.value = '';
   ccDrop.classList.add('open');
   ccBack.classList.add('open');
-  // scroll selected into view
-  const sel = ccList.querySelector('.cc-option.selected');
-  if (sel) sel.scrollIntoView({ block: 'center' });
+  setTimeout(() => {
+    const sel = ccList.querySelector('.cc-option.selected');
+    if (sel) sel.scrollIntoView({ block: 'center' });
+  }, 50);
 }
 function closeCCDropdown() {
   ccDrop.classList.remove('open');
   ccBack.classList.remove('open');
 }
 
-CC.forEach(([iso, code]) => {
-  const div = document.createElement('div');
-  div.className = 'cc-option';
-  div.dataset.code = code;
-  div.innerHTML = `<span>${iso}</span><span class="cc-option-code">${code}</span>`;
-  div.addEventListener('click', () => {
-    setCCValue(iso, code);
-    closeCCDropdown();
-    const digits = document.getElementById('phoneInput').value.replace(/\D/g, '');
-    if (digits) {
-      const err = getPhoneError(digits, ccValue);
-      if (err) showPhoneErr(err); else clearPhoneErr();
-    }
-  });
-  ccList.appendChild(div);
-});
-
+ccSearch.addEventListener('input', () => renderCCList(ccSearch.value));
 document.getElementById('ccTrigger').addEventListener('click', openCCDropdown);
+document.getElementById('ccCloseBtn').addEventListener('click', closeCCDropdown);
 ccBack.addEventListener('click', closeCCDropdown);
 
 // Set default by timezone
@@ -766,10 +854,10 @@ ccBack.addEventListener('click', closeCCDropdown);
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const code = TZ_MAP[tz] || '+91';
-    const entry = CC.find(([,c]) => c === code);
-    if (entry) { setCCValue(entry[0], entry[1]); return; }
+    const entry = CC.find(([,n,c]) => c === code);
+    if (entry) { setCCValue(entry[0], entry[1], entry[2]); return; }
   } catch(e) {}
-  setCCValue('IN', '+91');
+  setCCValue('IN', 'India', '+91');
 })();
 
 // ── Settings panel ──
@@ -1009,8 +1097,8 @@ function resetForm() {
       return TZ_MAP[tz] || '+91';
     } catch(e) { return '+91'; }
   })();
-  const entry = CC.find(([,c]) => c === defaultCode) || ['IN', '+91'];
-  setCCValue(entry[0], entry[1]);
+  const entry = CC.find(([,n,c]) => c === defaultCode) || ['IN','India','+91'];
+  setCCValue(entry[0], entry[1], entry[2]);
   if (platform !== 'wa') setPlatform('wa');
   document.getElementById('phoneInput').focus();
 }
