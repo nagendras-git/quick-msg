@@ -249,28 +249,64 @@ body {
 
 .cc-wrap {
   position: relative; flex-shrink: 0;
-  width: auto; min-width: 0;
 }
-.cc-wrap select {
-  appearance: none; -webkit-appearance: none;
-  background: transparent; border: none;
+/* Custom visible trigger button */
+.cc-trigger {
+  display: flex; align-items: center; gap: 5px;
+  padding: 0 10px;
+  height: 52px;
   border-right: 1.5px solid var(--border);
-  color: var(--text1); font-family: var(--mono);
-  font-size: 15px; font-weight: 500;
-  padding: 0 1.5rem 0 0.625rem;
-  height: 52px; width: auto;
-  cursor: pointer; outline: none;
-  text-align: left;
-  text-align-last: left;
   border-radius: var(--r-lg) 0 0 var(--r-lg);
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  will-change: transform;
+  cursor: pointer; white-space: nowrap;
+  font-family: var(--mono); font-size: 15px; font-weight: 500;
+  color: var(--text1); background: transparent;
+  border-top: none; border-bottom: none; border-left: none;
+  user-select: none; -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
-.cc-arr {
-  position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%);
-  pointer-events: none; color: var(--text3);
+.cc-trigger svg { flex-shrink: 0; color: var(--text3); pointer-events: none; }
+/* Custom dropdown list */
+.cc-dropdown {
+  display: none;
+  position: fixed;
+  left: 50%; transform: translateX(-50%);
+  bottom: 0;
+  width: min(100vw, 480px);
+  max-height: 60vh;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px 20px 0 0;
+  overflow-y: auto;
+  z-index: 200;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -4px 32px rgba(0,0,0,0.5);
 }
+.cc-dropdown.open { display: block; }
+.cc-dropdown-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--border); margin: 10px auto 6px;
+}
+.cc-dropdown-title {
+  text-align: center; font-size: 0.75rem; font-weight: 600;
+  color: var(--text3); letter-spacing: 0.4px; text-transform: uppercase;
+  padding-bottom: 8px;
+}
+.cc-option {
+  display: flex; align-items: center; padding: 13px 20px;
+  font-family: var(--mono); font-size: 15px; font-weight: 500;
+  color: var(--text1); cursor: pointer; gap: 10px;
+  border-bottom: 1px solid var(--border2);
+  -webkit-tap-highlight-color: transparent;
+}
+.cc-option:last-child { border-bottom: none; }
+.cc-option:active { background: var(--surface2); }
+.cc-option.selected { color: var(--accent); }
+.cc-option-code { color: var(--text3); font-size: 13px; margin-left: auto; }
+.cc-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55); z-index: 199;
+}
+.cc-backdrop.open { display: block; }
 .phone-input {
   flex: 1; min-width: 0; border: none; outline: none;
   background: transparent; color: var(--text1);
@@ -555,10 +591,19 @@ textarea::placeholder { color: var(--text3); }
       <label for="phoneInput">Phone Number</label>
       <div class="phone-wrap" id="phoneWrap">
         <div class="cc-wrap">
-          <select id="countryCode" aria-label="Country code"></select>
-          <svg class="cc-arr" width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M3 5.5L7 9.5L11 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <button class="cc-trigger" id="ccTrigger" type="button" aria-label="Select country code">
+            <span id="ccLabel">IN +91</span>
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+              <path d="M3 5.5L7 9.5L11 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <!-- Country code backdrop + sheet -->
+        <div class="cc-backdrop" id="ccBackdrop"></div>
+        <div class="cc-dropdown" id="ccDropdown">
+          <div class="cc-dropdown-handle"></div>
+          <div class="cc-dropdown-title">Select Country Code</div>
+          <div id="ccList"></div>
         </div>
         <input type="tel" id="phoneInput" class="phone-input"
                placeholder="Enter number…" inputmode="numeric" autocomplete="off"
@@ -665,22 +710,66 @@ const TZ_MAP = {
 const WA_PATH = `M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z`;
 const TG_PATH = `M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z`;
 
-// ── Country select ──
-const ccSel = document.getElementById('countryCode');
+// ── Country code custom dropdown ──
+let ccValue = '+91';
+const ccLabel  = document.getElementById('ccLabel');
+const ccList   = document.getElementById('ccList');
+const ccDrop   = document.getElementById('ccDropdown');
+const ccBack   = document.getElementById('ccBackdrop');
+
+// Stub so validation code that references ccSel.value still works
+const ccSel = { get value() { return ccValue; } };
+
+function setCCValue(iso, code) {
+  ccValue = code;
+  ccLabel.textContent = `${iso} ${code}`;
+  // update selected highlight
+  ccList.querySelectorAll('.cc-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.code === code);
+  });
+}
+
+function openCCDropdown() {
+  ccDrop.classList.add('open');
+  ccBack.classList.add('open');
+  // scroll selected into view
+  const sel = ccList.querySelector('.cc-option.selected');
+  if (sel) sel.scrollIntoView({ block: 'center' });
+}
+function closeCCDropdown() {
+  ccDrop.classList.remove('open');
+  ccBack.classList.remove('open');
+}
+
 CC.forEach(([iso, code]) => {
-  const o = document.createElement('option');
-  o.value = code; o.textContent = `${iso} ${code}`;
-  ccSel.appendChild(o);
+  const div = document.createElement('div');
+  div.className = 'cc-option';
+  div.dataset.code = code;
+  div.innerHTML = `<span>${iso}</span><span class="cc-option-code">${code}</span>`;
+  div.addEventListener('click', () => {
+    setCCValue(iso, code);
+    closeCCDropdown();
+    const digits = document.getElementById('phoneInput').value.replace(/\D/g, '');
+    if (digits) {
+      const err = getPhoneError(digits, ccValue);
+      if (err) showPhoneErr(err); else clearPhoneErr();
+    }
+  });
+  ccList.appendChild(div);
 });
+
+document.getElementById('ccTrigger').addEventListener('click', openCCDropdown);
+ccBack.addEventListener('click', closeCCDropdown);
+
+// Set default by timezone
 (function setDefault() {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const code = TZ_MAP[tz] || '+91';
-    const o = [...ccSel.options].find(x => x.value === code);
-    if (o) { o.selected = true; return; }
+    const entry = CC.find(([,c]) => c === code);
+    if (entry) { setCCValue(entry[0], entry[1]); return; }
   } catch(e) {}
-  const f = [...ccSel.options].find(x => x.value === '+91');
-  if (f) f.selected = true;
+  setCCValue('IN', '+91');
 })();
 
 // ── Settings panel ──
@@ -795,13 +884,7 @@ document.getElementById('phoneInput').addEventListener('input', function() {
   const err = getPhoneError(digits, ccSel.value);
   if (err) showPhoneErr(err); else clearPhoneErr();
 });
-ccSel.addEventListener('change', function() {
-  const digits = document.getElementById('phoneInput').value.replace(/\D/g, '');
-  if (digits) {
-    const err = getPhoneError(digits, this.value);
-    if (err) showPhoneErr(err); else clearPhoneErr();
-  }
-});
+/* cc change handled in dropdown click */
 
 // ── Open chat ──
 function openChat() {
@@ -926,10 +1009,8 @@ function resetForm() {
       return TZ_MAP[tz] || '+91';
     } catch(e) { return '+91'; }
   })();
-  const f = [...ccSel.options].find(x => x.value === defaultCode);
-  if (f) f.selected = true;
-  // Only call setPlatform if switching away from wa — avoids unnecessary
-  // CSS variable repaint that shifts the select on Android
+  const entry = CC.find(([,c]) => c === defaultCode) || ['IN', '+91'];
+  setCCValue(entry[0], entry[1]);
   if (platform !== 'wa') setPlatform('wa');
   document.getElementById('phoneInput').focus();
 }
