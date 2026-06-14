@@ -129,11 +129,48 @@
 
     .sp-handle {
       width: 2.5rem; height: 0.25rem; border-radius: 1rem;
-      background: var(--border); margin: 0 auto 1.25rem;
+      background: var(--border); margin: 0 auto 1rem;
+    }
+    .sp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.5rem;
     }
     .sp-title {
-      font-size: 1rem; font-weight: 700; margin-bottom: 1.25rem;
+      font-size: 1rem; font-weight: 700;
       color: var(--text);
+    }
+    .sp-close-btn {
+      width: 2rem; height: 2rem; border-radius: 50%;
+      border: none; background: var(--sur2); color: var(--sub);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+      transition: background .2s, color .2s;
+    }
+    .sp-close-btn:hover { background: var(--border); color: var(--text); }
+    .sp-close-btn:active { transform: scale(.92); }
+
+    /* Dark mode toggle switch */
+    .theme-toggle {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: none; border: none; cursor: pointer;
+      padding: 0; font-family: var(--font);
+    }
+    .theme-toggle-track {
+      position: relative; width: 2.75rem; height: 1.5rem;
+      background: var(--border); border-radius: 999px;
+      transition: background .25s;
+      display: block; flex-shrink: 0;
+    }
+    [data-theme="dark"] .theme-toggle-track { background: var(--accent); }
+    .theme-toggle-thumb {
+      position: absolute; top: 0.1875rem; left: 0.1875rem;
+      width: 1.125rem; height: 1.125rem; border-radius: 50%;
+      background: #fff; transition: transform .25s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 1px 4px rgba(0,0,0,.25);
+    }
+    [data-theme="dark"] .theme-toggle-thumb { transform: translateX(1.25rem); }
+    .theme-toggle-label {
+      font-size: 0.875rem; font-weight: 500; color: var(--text);
     }
     .sp-row {
       display: flex; align-items: center; justify-content: space-between;
@@ -161,16 +198,7 @@
     .sz-btn.active { background: var(--accent); color: #fff; }
     .sz-btn:not(.active):hover { color: var(--text); }
 
-    /* Theme toggle */
-    .theme-btn {
-      width: 2.375rem; height: 2.375rem; border-radius: 0.625rem;
-      border: 1.5px solid var(--border);
-      background: var(--bg); color: var(--text);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 1.125rem; flex-shrink: 0;
-      transition: background .2s, border-color .2s;
-    }
-    .theme-btn:active { transform: scale(.92); }
+    /* Theme toggle (legacy - removed) */
 
     /* ── Banners ── */
     .banner {
@@ -427,7 +455,9 @@
                placeholder="Enter number…" inputmode="tel" autocomplete="off" />
       </div>
       <div class="phone-error" id="phoneError"></div>
-    </div>Message <span style="font-weight:400;opacity:.65">(optional)</span></label>
+    </div>
+    <div class="field">
+      <label for="msgInput">Message <span style="font-weight:400;opacity:.65">(optional)</span></label>
       <div class="msg-wrap">
         <textarea id="msgInput" placeholder="Type a message to pre-fill…"
                   maxlength="1000" rows="3"></textarea>
@@ -465,7 +495,14 @@
 <div class="settings-backdrop" id="settingsBackdrop" onclick="closeSettings()"></div>
 <div class="settings-panel" id="settingsPanel">
   <div class="sp-handle"></div>
-  <div class="sp-title">Settings</div>
+  <div class="sp-header">
+    <div class="sp-title">Settings</div>
+    <button class="sp-close-btn" onclick="closeSettings()" aria-label="Close settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
 
   <div class="sp-row">
     <span class="sp-label">Text Size</span>
@@ -478,8 +515,13 @@
   </div>
 
   <div class="sp-row">
-    <span class="sp-label">Appearance</span>
-    <button class="theme-btn" id="themeBtn">☀️</button>
+    <span class="sp-label">Dark Mode</span>
+    <button class="theme-toggle" id="themeBtn" onclick="void(0)" aria-label="Toggle dark mode">
+      <span class="theme-toggle-track">
+        <span class="theme-toggle-thumb"></span>
+      </span>
+      <span class="theme-toggle-label" id="themeLbl">Dark</span>
+    </button>
   </div>
 </div>
 
@@ -566,7 +608,8 @@ const themeMeta = document.getElementById('themeColorMeta');
 
 function applyTheme(t) {
   html.setAttribute('data-theme', t);
-  themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+  const lbl = document.getElementById('themeLbl');
+  if (lbl) lbl.textContent = t === 'dark' ? 'Dark' : 'Light';
   themeMeta.content = t === 'dark' ? '#0f1117' : '#f4f6fa';
   localStorage.setItem('qm_theme', t);
 }
