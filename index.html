@@ -279,8 +279,11 @@
       color: var(--text); font-family: var(--font);
       font-size: 1rem; font-weight: 500;
       padding: 0 1.875rem 0 0.75rem;
-      height: 3rem; width: 6.75rem;
+      height: 3rem; width: 6.75rem; min-width: 6.75rem;
       cursor: pointer; outline: none;
+      /* Prevent Android layout collapse on reset */
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
     .cc-arr {
       position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%);
@@ -515,8 +518,8 @@
   </div>
 
   <div class="sp-row">
-    <span class="sp-label">Dark Mode</span>
-    <button class="theme-toggle" id="themeBtn" onclick="void(0)" aria-label="Toggle dark mode">
+    <span class="sp-label">Theme</span>
+    <button class="theme-toggle" id="themeBtn" onclick="void(0)" aria-label="Toggle theme">
       <span class="theme-toggle-track">
         <span class="theme-toggle-thumb"></span>
       </span>
@@ -767,8 +770,18 @@ function resetForm() {
   clearPhoneErr();
   msgEl.value = '';
   document.getElementById('charCount').textContent = '0';
-  const f = [...ccSel.options].find(x => x.value === '+91');
+  const defaultCode = (function() {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      return TZ_MAP[tz] || '+91';
+    } catch(e) { return '+91'; }
+  })();
+  const f = [...ccSel.options].find(x => x.value === defaultCode);
   if (f) f.selected = true;
+  // Force Android to repaint the select so it doesn't shift left
+  ccSel.style.display = 'none';
+  ccSel.offsetHeight; // trigger reflow
+  ccSel.style.display = '';
   setPlatform('wa');
   document.getElementById('phoneInput').focus();
   toast('Form reset ✓');
