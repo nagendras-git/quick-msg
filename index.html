@@ -124,7 +124,7 @@ body {
 /* ── Layout ── */
 .app {
   width: 100%; max-width: 480px; margin: 0 auto;
-  padding: 0 14px 3.5rem;
+  padding: 1.25rem 14px 3.5rem;
   display: flex; flex-direction: column; gap: 1.25rem;
   min-height: 100dvh;
 }
@@ -259,6 +259,7 @@ body {
   padding: 0 1.875rem 0 0.75rem;
   height: 3rem; width: 100%;
   cursor: pointer; outline: none;
+  text-align: left;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
 }
@@ -860,10 +861,7 @@ function resetForm() {
   })();
   const f = [...ccSel.options].find(x => x.value === defaultCode);
   if (f) f.selected = true;
-  requestAnimationFrame(() => {
-    ccSel.style.opacity = '0.99';
-    requestAnimationFrame(() => { ccSel.style.opacity = ''; });
-  });
+  // Removed opacity hack — it caused the country code to shift left on Android
   setPlatform('wa');
   document.getElementById('phoneInput').focus();
   toast('Form reset ✓');
