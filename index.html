@@ -237,7 +237,7 @@ body {
 /* ── Phone row ── */
 .phone-wrap {
   display: flex; align-items: stretch;
-  border: 1.5px solid var(--border); border-radius: var(--r);
+  border: 1.5px solid var(--border); border-radius: var(--r-lg);
   overflow: hidden; background: var(--bg); transition: border-color .2s;
   height: 3rem;
 }
@@ -261,6 +261,7 @@ body {
   cursor: pointer; outline: none;
   text-align: left;
   text-align-last: left;
+  border-radius: var(--r-lg) 0 0 var(--r-lg);
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
   will-change: transform;
@@ -279,7 +280,7 @@ body {
 
 /* ── Message ── */
 .msg-wrap {
-  border: 1.5px solid var(--border); border-radius: var(--r);
+  border: 1.5px solid var(--border); border-radius: var(--r-lg);
   overflow: hidden; background: var(--bg); transition: border-color .2s;
 }
 .msg-wrap:focus-within { border-color: var(--accent); }
@@ -314,18 +315,42 @@ textarea::placeholder { color: var(--text3); }
   box-shadow: 0 4px 18px rgba(42,171,238,.35);
 }
 
-/* ── Reset button ── */
-.reset-btn {
-  width: 100%; padding: 0.5rem;
-  background: none; border: none; cursor: pointer;
-  font-family: var(--mono); font-size: 0.8125rem; font-weight: 500;
-  color: var(--text3);
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  opacity: 0.7; transition: opacity .2s;
+/* ── Clear pill — phone field ── */
+.phone-clear {
+  display: none; align-items: center; justify-content: center;
+  padding: 0 0.75rem; flex-shrink: 0; height: 3rem;
+  background: none; border: none; border-left: 1.5px solid var(--border);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
-.reset-btn:hover  { opacity: 1; }
-.reset-btn:active { opacity: 0.5; }
-.reset-btn svg { width: 0.875rem; height: 0.875rem; flex-shrink: 0; }
+.phone-clear.show { display: flex; }
+.phone-clear-pill {
+  display: flex; align-items: center; justify-content: center;
+  padding: 3px 8px; border-radius: 99px;
+  background: var(--surface3); border: 1px solid var(--border2);
+  font-family: var(--mono); font-size: 0.65rem;
+  font-weight: 600; color: var(--text3); letter-spacing: 0.2px;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.phone-clear:hover .phone-clear-pill { color: var(--accent); border-color: var(--accent); background: rgba(37,211,102,.06); }
+.phone-clear:active { opacity: 0.7; }
+
+/* ── Clear pill — message field ── */
+.msg-field-wrap {
+  position: relative;
+}
+.msg-clear {
+  display: none; align-items: center; justify-content: center;
+  position: absolute; top: 7px; right: 8px;
+  padding: 3px 8px; border-radius: 99px; z-index: 2;
+  background: var(--surface3); border: 1px solid var(--border2);
+  cursor: pointer; font-family: var(--mono); font-size: 0.65rem;
+  font-weight: 600; color: var(--text3); letter-spacing: 0.2px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .15s, color .15s;
+}
+.msg-clear.show { display: flex; }
+.msg-clear:hover { color: var(--accent); border-color: var(--accent); background: rgba(37,211,102,.06); }
+.msg-clear:active { opacity: 0.7; }
 
 /* ── History ── */
 .history-section { display: flex; flex-direction: column; gap: 0.625rem; }
@@ -534,17 +559,22 @@ textarea::placeholder { color: var(--text3); }
           </svg>
         </div>
         <input type="tel" id="phoneInput" class="phone-input"
-               placeholder="Enter number…" inputmode="tel" autocomplete="off"/>
+               placeholder="Enter number…" inputmode="numeric" autocomplete="off"
+               pattern="[0-9]*"/>
+        <button class="phone-clear" id="phoneClear" tabindex="-1" aria-label="Clear number"><span class="phone-clear-pill">Clear</span></button>
       </div>
       <div class="phone-error" id="phoneError"></div>
     </div>
 
     <div class="field">
       <label for="msgInput">Message <span class="opt">(optional)</span></label>
-      <div class="msg-wrap">
-        <textarea id="msgInput" placeholder="Type a message to pre-fill…"
-                  maxlength="1000" rows="3"></textarea>
-        <div class="char-count"><span id="charCount">0</span>/1000</div>
+      <div class="msg-field-wrap">
+        <button class="msg-clear" id="msgClear" tabindex="-1" aria-label="Clear message">Clear</button>
+        <div class="msg-wrap">
+          <textarea id="msgInput" placeholder="Type a message to pre-fill…"
+                    maxlength="1000" rows="3"></textarea>
+          <div class="char-count"><span id="charCount">0</span>/1000</div>
+        </div>
       </div>
     </div>
 
@@ -555,13 +585,7 @@ textarea::placeholder { color: var(--text3); }
       <span id="ctaLabel">Open in WhatsApp</span>
     </button>
 
-    <button class="reset-btn" onclick="resetForm()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-        <path d="M3 3v5h5"/>
-      </svg>
-      Reset
-    </button>
+
   </div>
 
   <!-- Recent History -->
@@ -755,9 +779,16 @@ function clearPhoneErr() {
   document.getElementById('phoneError').classList.remove('show');
 }
 
-// Live validation
+// Live validation (digits only)
 document.getElementById('phoneInput').addEventListener('input', function() {
-  const digits = this.value.replace(/\D/g, '');
+  // Strip any non-digit characters
+  const pos = this.selectionStart;
+  const cleaned = this.value.replace(/\D/g, '');
+  if (this.value !== cleaned) {
+    this.value = cleaned;
+    try { this.setSelectionRange(pos - 1, pos - 1); } catch(e) {}
+  }
+  const digits = cleaned;
   if (!digits) { clearPhoneErr(); return; }
   const err = getPhoneError(digits, ccSel.value);
   if (err) showPhoneErr(err); else clearPhoneErr();
@@ -845,7 +876,43 @@ function toast(msg) {
   clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
-// ── Reset ──
+// ── Clear × button ──
+(function() {
+  const pi = document.getElementById('phoneInput');
+  const pc = document.getElementById('phoneClear');
+  if (!pi || !pc) return;
+  // show/hide × as user types
+  pi.addEventListener('input', function() {
+    pc.classList.toggle('show', this.value.length > 0);
+  });
+  // prevent input blur on mousedown
+  pc.addEventListener('mousedown', function(e) { e.preventDefault(); });
+  // clear everything on click
+  pc.addEventListener('click', function() {
+    pi.value = ''; pc.classList.remove('show');
+    clearPhoneErr();
+    pi.focus();
+  });
+})();
+
+// ── Message clear × ──
+(function() {
+  const mc = document.getElementById('msgClear');
+  if (!mc) return;
+  msgEl.addEventListener('input', function() {
+    mc.classList.toggle('show', this.value.length > 0);
+    document.getElementById('charCount').textContent = this.value.length;
+  });
+  mc.addEventListener('mousedown', function(e) { e.preventDefault(); });
+  mc.addEventListener('click', function() {
+    msgEl.value = '';
+    document.getElementById('charCount').textContent = '0';
+    mc.classList.remove('show');
+    msgEl.focus();
+  });
+})();
+
+// ── Reset (kept for potential future use, not shown in UI) ──
 function resetForm() {
   document.getElementById('phoneInput').value = '';
   clearPhoneErr();
@@ -863,7 +930,6 @@ function resetForm() {
   // CSS variable repaint that shifts the select on Android
   if (platform !== 'wa') setPlatform('wa');
   document.getElementById('phoneInput').focus();
-  toast('Form reset ✓');
 }
 
 // ── PWA install ──
