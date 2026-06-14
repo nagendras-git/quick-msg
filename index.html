@@ -271,7 +271,10 @@
     .phone-error { display:none; font-size:0.72rem; color:#ef4444; margin-top:0.3rem; padding-left:0.125rem; }
     .phone-error.show { display:block; }
 
-    .cc-wrap { position: relative; flex-shrink: 0; }
+    .cc-wrap {
+      position: relative; flex-shrink: 0;
+      width: 6.75rem; min-width: 6.75rem; /* fixed width — never collapses on Android */
+    }
     .cc-wrap select {
       appearance: none; -webkit-appearance: none;
       background: transparent; border: none;
@@ -279,9 +282,9 @@
       color: var(--text); font-family: var(--font);
       font-size: 1rem; font-weight: 500;
       padding: 0 1.875rem 0 0.75rem;
-      height: 3rem; width: 6.75rem; min-width: 6.75rem;
+      height: 3rem;
+      width: 100%; /* fills the fixed cc-wrap — no intrinsic-width recalc */
       cursor: pointer; outline: none;
-      /* Prevent Android layout collapse on reset */
       -webkit-transform: translateZ(0);
       transform: translateZ(0);
     }
@@ -778,10 +781,12 @@ function resetForm() {
   })();
   const f = [...ccSel.options].find(x => x.value === defaultCode);
   if (f) f.selected = true;
-  // Force Android to repaint the select so it doesn't shift left
-  ccSel.style.display = 'none';
-  ccSel.offsetHeight; // trigger reflow
-  ccSel.style.display = '';
+  // Force Android to repaint select without shifting layout:
+  // width is already locked on .cc-wrap, so just nudge the GPU layer.
+  requestAnimationFrame(() => {
+    ccSel.style.opacity = '0.99';
+    requestAnimationFrame(() => { ccSel.style.opacity = ''; });
+  });
   setPlatform('wa');
   document.getElementById('phoneInput').focus();
   toast('Form reset ✓');
