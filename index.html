@@ -466,6 +466,7 @@ textarea::placeholder { color: var(--text3); }
 .hnum  { font-size: 0.875rem; font-weight: 600; color: var(--text1); }
 .htime { font-size: 0.68rem; color: var(--text3); margin-top: 1px; }
 .harr  { color: var(--text3); font-size: 1.1rem; flex-shrink: 0; }
+.hmsg { font-size: 12px; color: var(--text3); margin-top: 2px; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
 
 /* ── Settings panel (index4 sheet style) ── */
 .settings-backdrop {
@@ -987,7 +988,7 @@ function openChat() {
   const url  = platform === 'wa'
     ? `https://wa.me/${full}` + (msg ? `?text=${encodeURIComponent(msg)}` : '')
     : `https://t.me/+${full}` + (msg ? `?text=${encodeURIComponent(msg)}` : '');
-  saveHist({ platform, number: full, display: `${cc} ${raw}`, ts: Date.now() });
+  saveHist({ platform, number: full, display: `${cc} ${raw}`, msg, ts: Date.now() });
   renderHist();
   window.open(url, '_blank');
 }
@@ -1016,33 +1017,41 @@ function renderHist() {
               ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
     const icon  = e.platform === 'wa' ? '💬' : '✈️';
     const label = e.platform === 'wa' ? 'WhatsApp' : 'Telegram';
-    const ep = e.platform, en = e.number.replace(/'/g,"\\'"), ed = e.display.replace(/'/g,"\\'");
-    return `<div class="hist-item" onclick="fillHist('${ep}','${en}','${ed}')">
+    const msgPreview = e.msg ? `<div class="hmsg">${e.msg.length > 40 ? e.msg.slice(0,40)+'…' : e.msg}</div>` : '';
+    return `<div class="hist-item" onclick="fillHist(${i})">
       <div class="hbadge ${e.platform}">${icon}</div>
       <div class="hinfo">
         <div class="hnum">${e.display}</div>
         <div class="htime">${label} · ${t}</div>
+        ${msgPreview}
       </div>
       <span class="harr">›</span>
     </div>`;
   }).join('');
 }
 
-function fillHist(p, full, display) {
-  setPlatform(p);
-  // Sort by code length descending so +971 matches before +1
+function fillHist(idx) {
+  const e = getHist()[idx];
+  if (!e) return;
+  setPlatform(e.platform);
+  // Restore country code — sort longest first so +971 won't match +1
   const sorted = [...CC].sort((a, b) => b[2].length - a[2].length);
   let matched = false;
   for (const [iso, name, code] of sorted) {
     const digits = code.replace(/\D/g, '');
-    if (full.startsWith(digits)) {
+    if (e.number.startsWith(digits)) {
       setCCValue(iso, name, code);
-      document.getElementById('phoneInput').value = full.slice(digits.length);
+      document.getElementById('phoneInput').value = e.number.slice(digits.length);
       matched = true;
       break;
     }
   }
-  if (!matched) document.getElementById('phoneInput').value = full;
+  if (!matched) document.getElementById('phoneInput').value = e.number;
+  // Restore message
+  const msgEl2 = document.getElementById('msgInput');
+  msgEl2.value = e.msg || '';
+  document.getElementById('charCount').textContent = msgEl2.value.length;
+  // Show clear button
   const pc = document.getElementById('phoneClear');
   if (pc) pc.classList.add('show');
   clearPhoneErr();
