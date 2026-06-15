@@ -1011,7 +1011,7 @@ function renderHist() {
   const list = document.getElementById('histList');
   if (!h.length) { sec.style.display = 'none'; return; }
   sec.style.display = 'flex';
-  list.innerHTML = h.map(e => {
+  list.innerHTML = h.map((e, i) => {
     const d = new Date(e.ts);
     const t = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
               ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
