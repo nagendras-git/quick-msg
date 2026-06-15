@@ -1030,14 +1030,23 @@ function renderHist() {
 
 function fillHist(p, full, display) {
   setPlatform(p);
-  for (const o of ccSel.options) {
-    const cd = o.value.replace(/\D/g, '');
-    if (full.startsWith(cd)) {
-      o.selected = true;
-      document.getElementById('phoneInput').value = full.slice(cd.length);
+  // Sort by code length descending so +971 matches before +1
+  const sorted = [...CC].sort((a, b) => b[2].length - a[2].length);
+  let matched = false;
+  for (const [iso, name, code] of sorted) {
+    const digits = code.replace(/\D/g, '');
+    if (full.startsWith(digits)) {
+      setCCValue(iso, name, code);
+      document.getElementById('phoneInput').value = full.slice(digits.length);
+      matched = true;
       break;
     }
   }
+  if (!matched) document.getElementById('phoneInput').value = full;
+  const pc = document.getElementById('phoneClear');
+  if (pc) pc.classList.add('show');
+  clearPhoneErr();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   document.getElementById('phoneInput').focus();
 }
 
