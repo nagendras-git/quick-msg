@@ -986,7 +986,7 @@ function openChat() {
   const full = cc.replace(/\D/g, '') + digits.replace(/^0+/, '');
   const url  = platform === 'wa'
     ? `https://wa.me/${full}` + (msg ? `?text=${encodeURIComponent(msg)}` : '')
-    : `https://t.me/+${full}`;
+    : `https://t.me/+${full}` + (msg ? `?text=${encodeURIComponent(msg)}` : '');
   saveHist({ platform, number: full, display: `${cc} ${raw}`, ts: Date.now() });
   renderHist();
   window.open(url, '_blank');
